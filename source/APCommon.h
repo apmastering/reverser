@@ -10,11 +10,11 @@
 
 #define DEBUG_MODE 0
 
-inline double linearToExponential(double linearValue, double minValue, double maxValue) {
+inline double linearToExponential(double linearValue, const double minValue, const double maxValue) {
     linearValue = std::clamp(linearValue, minValue, maxValue);
-    double normalized = (linearValue - minValue) / (maxValue - minValue);
-    double exponentialValue = std::pow(normalized, 2.0);
-    double result = minValue + exponentialValue * (maxValue - minValue);
+    const double normalized = (linearValue - minValue) / (maxValue - minValue);
+    const double exponentialValue = std::pow(normalized, 2.0);
+    const double result = minValue + exponentialValue * (maxValue - minValue);
     return result;
 }
 
@@ -27,13 +27,13 @@ inline double gainToDecibels(double gain) {
     return 20.0 * std::log10(gain);
 }
 
-inline double decibelsToGain(double decibels) {
+inline float decibelsToGain(float decibels) {
     if (decibels <= -1000)
         return 0.0;
     
     if (decibels > 1000) decibels = 1000;
     
-    return std::pow(10.0, decibels / 20.0);
+    return std::pow(10.0f, decibels / 20.0f);
 }
 
 enum class ButtonName {
@@ -55,7 +55,7 @@ struct ParameterQuery {
     ParameterNames parameterEnum;
 };
 
-inline ParameterQuery queryParameter(ParameterNames paramName) {
+inline ParameterQuery queryParameter(const ParameterNames paramName) {
 
     static const std::unordered_map<ParameterNames, ParameterQuery> paramNameMap = {
         {ParameterNames::inGain,       { "inGain",       "Input Gain",  ParameterNames::inGain  }},
@@ -64,15 +64,8 @@ inline ParameterQuery queryParameter(ParameterNames paramName) {
     };
     
     if (paramName != ParameterNames::END) {
-        auto it = paramNameMap.find(paramName);
-        if (it != paramNameMap.end()) return it->second;
+        if (const auto it = paramNameMap.find(paramName); it != paramNameMap.end()) return it->second;
     }
 
-    static const std::unordered_map<std::string, ParameterNames> nameToEnumMap = {
-        {"inGain",        ParameterNames::inGain},
-        {"outGain",       ParameterNames::outGain},
-        {"reverse",       ParameterNames::reverse},
-    };
-    
-    throw std::invalid_argument("Both enum and string queries failed for parameter for queryParameter");
+    throw std::invalid_argument("Enum query failed for parameter for queryParameter");
 }

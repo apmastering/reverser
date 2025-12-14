@@ -17,16 +17,16 @@ void APComp::changeProgramName (int index, const juce::String& newName) {}
 bool APComp::hasEditor() const { return true; }
 void APComp::releaseResources() {}
 
-bool APComp::isBusesLayoutSupported (const BusesLayout& l) const {
-    const auto in  = l.getMainInputChannelSet();
-    const auto out = l.getMainOutputChannelSet();
+bool APComp::isBusesLayoutSupported (const BusesLayout& layouts) const {
 
-    if (in != out) return false;
+    const auto in  = layouts.getMainInputChannelSet();
+
+    if (const auto out = layouts.getMainOutputChannelSet(); in != out) return false;
     if (in != juce::AudioChannelSet::mono()
      && in != juce::AudioChannelSet::stereo())
         return false;
 
-    if (l.inputBuses.size() > 1) {
+    if (layouts.inputBuses.size() > 1) {
         return false;
     }
     
@@ -36,15 +36,13 @@ bool APComp::isBusesLayoutSupported (const BusesLayout& l) const {
 juce::AudioProcessorEditor* APComp::createEditor() { return new GUI (*this); }
 
 void APComp::getStateInformation (juce::MemoryBlock& destData) {
-    
-    std::unique_ptr<juce::XmlElement> xml (apvts.state.createXml());
+
+    const std::unique_ptr<juce::XmlElement> xml (apvts.state.createXml());
     copyXmlToBinary (*xml, destData);
 }
 
-void APComp::setStateInformation (const void* data, int sizeInBytes) {
-    
-        std::unique_ptr<juce::XmlElement> xml (getXmlFromBinary (data, sizeInBytes));
-        if (xml != nullptr)
+void APComp::setStateInformation (const void* data, const int sizeInBytes) {
+    if (const std::unique_ptr<juce::XmlElement> xml (getXmlFromBinary (data, sizeInBytes)); xml != nullptr)
         {
             if (xml->hasTagName (apvts.state.getType()))
             {

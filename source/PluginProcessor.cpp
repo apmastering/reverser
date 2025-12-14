@@ -26,37 +26,53 @@ float APComp::getFloatKnobValue(ParameterNames parameter) const {
 }
 
 
-void APComp::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
+void APComp::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer&) {
     
     juce::ScopedNoDenormals noDenormals;
 
-    int totalNumInputChannels = getTotalNumInputChannels();
-    int totalNumOutputChannels = getTotalNumOutputChannels();
+    const int totalNumInputChannels = getTotalNumInputChannels();
+    const int totalNumOutputChannels = getTotalNumOutputChannels();
     
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i) buffer.clear(i, 0, buffer.getNumSamples());
     
-    const float inputGainValue  = getFloatKnobValue(ParameterNames::inGain);
-    const float outputGainValue = getFloatKnobValue(ParameterNames::outGain);
-    const bool  reverse         = getFloatKnobValue(ParameterNames::reverse) > 0.5 ? true : false;
-  
+    const float inputGainValue  = decibelsToGain(getFloatKnobValue(ParameterNames::inGain));
+    const float outputGainValue = decibelsToGain(getFloatKnobValue(ParameterNames::outGain));
+    const bool  reverse         = getFloatKnobValue(ParameterNames::reverse) > 0.5;
+
+    // ReSharper disable once CppTooWideScopeInitStatement
+    const size_t clippingCountdownLocal = clippingCountdown.load(std::memory_order_acquire);
+    if (clippingCountdownLocal > 0) clippingCountdown.store(clippingCountdownLocal - 1, std::memory_order_release);
+
     float* channelData[2];
     
     for (int i = 0; i < totalNumInputChannels && i < 2; i++) channelData[i] = buffer.getWritePointer(i);
     
     if (reverse) {
-        
+        bool clipped = false;
+
         for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
             for (int channel = 0; channel < 2 && channel < totalNumInputChannels; channel++) {
                 
                 float s = channelData[channel][sample];
+                s *= inputGainValue;
                 s = std::atanh(s);
-                
-                if (s > 1.0f) s = 1.0f;
-                if (s < -1.0f) s = -1.0f;
-                channelData[channel][sample] *= decibelsToGain(s * outputGainValue);
+                s *= 0.3f;
+                s *= outputGainValue;
+
+                if (s > 1.2f) {
+                    s = 1.2f;
+                    clipped = true;
+                }
+                if (s < -1.2f) {
+                    s = -1.2f;
+                    clipped = true;
+                }
+
+                channelData[channel][sample] = s;
             }
         }
-        
+
+        if (clipped) clippingCountdown.store(clippingCountdownAmount, std::memory_order_release);
         return;
     }
         
@@ -64,8 +80,9 @@ void APComp::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& m
         for (int channel = 0; channel < 2 && channel < totalNumInputChannels; channel++) {
             
             float s = channelData[channel][sample];
-            s *= decibelsToGain(inputGainValue);
-            channelData[channel][sample] = std::tanh(s);
+            s *= inputGainValue;
+            s = std::tanh(s);
+            channelData[channel][sample] = s;
         }
     }
 }

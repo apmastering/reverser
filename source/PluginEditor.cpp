@@ -11,19 +11,15 @@
 GUI::GUI (APComp& p)
 : AudioProcessorEditor (&p),
 audioProcessor (p),
-knobLook1(),
 backgroundImage (juce::ImageFileFormat::loadFrom(BinaryData::bg_png, BinaryData::bg_pngSize)),
-inGainSlider(),
-outGainSlider(),
-reverseSlider(),
 inGainAttachment (std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "inGain", inGainSlider)),
 outGainAttachment (std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "outGain", outGainSlider)),
 reverseAttachment (std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "reverse", reverseSlider)) {
           
-    for (size_t i = 0; i < sliders.size(); ++i) {
+    for (auto &[fst, snd] : sliders) {
         
-        juce::Slider& slider = sliders[i].second.get();
-        const std::string& sliderName = sliders[i].first;
+        juce::Slider& slider = snd.get();
+        const std::string& sliderName = fst;
 
         slider.setSliderStyle(juce::Slider::RotaryVerticalDrag);
         slider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
@@ -33,24 +29,20 @@ reverseAttachment (std::make_unique<juce::AudioProcessorValueTreeState::SliderAt
                 
     inGainSlider.setLookAndFeel(&knobLook1);
     outGainSlider.setLookAndFeel(&knobLook1);
-    
     reverseSlider.setVisible(false);
 
     setSize (460, 490);
-    
-    const int refreshRate = 33;
+
+    constexpr int refreshRate = 33;
     startTimer(refreshRate);
 }
-
 
 GUI::~GUI() {
     
     stopTimer();
-    
     inGainSlider.setLookAndFeel(nullptr);
     outGainSlider.setLookAndFeel(nullptr);
 }
-
 
 void GUI::paint (juce::Graphics& g) {
     
@@ -63,12 +55,16 @@ void GUI::paint (juce::Graphics& g) {
         g.drawFittedText ("AP Mastering - Distortion Reverser: GUI error", getLocalBounds(), juce::Justification::centredTop, 1);
     }
     
-    const bool reverseMode = audioProcessor.getFloatKnobValue(ParameterNames::reverse) > 0.5 ? true : false;
-    
-    const float buttonFillAmount = 1;
-    
-    g.setColour(juce::Colours::white.withAlpha(0.4f));
-    
+    const bool reverseMode = audioProcessor.getFloatKnobValue(ParameterNames::reverse) > 0.5;
+
+    constexpr float buttonFillAmount = 1;
+
+    if (audioProcessor.isClipping()) {
+        g.setColour(juce::Colours::red);
+    } else {
+        g.setColour(juce::Colours::white.withAlpha(0.4f));
+    }
+
     if (reverseMode) {
         g.fillEllipse(column2 - buttonRadius * buttonFillAmount, 
                       row1 - buttonRadius * buttonFillAmount, 
@@ -84,10 +80,9 @@ void GUI::paint (juce::Graphics& g) {
 
 
 void GUI::resized() {
-    
-    const int IOknobWidth  = 54;
-    const int IOknobHeight = IOknobWidth;
-    const int IOradius = IOknobWidth / 2;
+    constexpr int IOknobWidth  = 54;
+    constexpr int IOknobHeight = IOknobWidth;
+    constexpr int IOradius = IOknobWidth / 2;
     
     inGainSlider.setBounds (column1 - IOradius,
                             row2 - IOradius,
@@ -101,7 +96,6 @@ void GUI::resized() {
 
 
 void GUI::timerCallback() {
-    
     repaint();
 }
 
@@ -132,17 +126,14 @@ void GUI::mouseDown (const juce::MouseEvent& event) {
     ButtonName button = determineButton(event);
 
     switch (button) {
-            
         case ButtonName::none:                               return;
-        case ButtonName::saturate: { reverseMode(false);     return; }
-        case ButtonName::reverse:  { reverseMode(true);      return; }
-        
-        default: return;
+        case ButtonName::saturate: { reverseMode(false); return; }
+        case ButtonName::reverse:  { reverseMode(true); }
     }
 }
 
 
-void GUI::reverseMode(bool active) {
+void GUI::reverseMode(const bool active) {
     
     reverseSlider.setValue(active ? 1 : 0);
 }

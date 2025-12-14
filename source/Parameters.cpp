@@ -16,28 +16,11 @@ std::unique_ptr<juce::RangedAudioParameter> newFloatParam(ParameterNames paramNa
 }
 
 
-std::unique_ptr<juce::RangedAudioParameter> newIntParam(ParameterNames paramName,
-                                                        int minValue,
-                                                        int maxValue,
-                                                        int defaultValue) {
-    
-    ParameterQuery parameterQuery = queryParameter(paramName);
-
-    
-    return std::make_unique<juce::AudioParameterInt>(juce::ParameterID(parameterQuery.id, static_cast<int>(paramName) + 1),
-                                                     parameterQuery.id,
-                                                     minValue,
-                                                     maxValue,
-                                                     defaultValue,
-                                                     parameterQuery.label);
-}
-
-
 juce::AudioProcessorValueTreeState::ParameterLayout APComp::createParameterLayout() {
     
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
-    params.push_back(newFloatParam(ParameterNames::inGain,     -0.0f,    24.0f,     0.0f  ));
+    params.push_back(newFloatParam(ParameterNames::inGain,     -24.0f,    24.0f,     0.0f  ));
     params.push_back(newFloatParam(ParameterNames::outGain,    -24.0f,   0.0f,     -24.0f ));
     params.push_back(newFloatParam(ParameterNames::reverse,     0.0f,    1.0f,      0.0f  ));
 

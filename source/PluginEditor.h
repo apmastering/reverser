@@ -49,7 +49,7 @@ private:
     const int row2 = 442;
     const int column1 = 125;
     const int column2 = 327;
-    const int buttonRadius = 20;
+    const int buttonRadius = 18;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GUI)
 };

@@ -36,10 +36,9 @@ void drawKnob(juce::Graphics &g,
     const float rx = x - radius;
     const float ry = y - radius;
     const float angle = rotaryStartAngle + sliderPosProportional * (rotaryEndAngle - rotaryStartAngle);
-    const float scalingFactor = 0.5;
-    
+
     if (knobImage.isValid()) {
-        
+        constexpr float scalingFactor = 0.5;
         g.saveState();
         g.addTransform(juce::AffineTransform::rotation(angle, centreX, centreY).scaled(scalingFactor));
         g.drawImageTransformed(knobImage, juce::AffineTransform::translation(rx, ry), false);
