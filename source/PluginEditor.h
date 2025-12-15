@@ -13,7 +13,7 @@ class GUI final : public juce::AudioProcessorEditor, private juce::Timer {
 
 public:
     
-    GUI (APComp&);
+    GUI (Reverser&);
     ~GUI() override;
     
     void paint (juce::Graphics&) override;
@@ -25,7 +25,7 @@ public:
     
 private:
     
-    APComp& audioProcessor;
+    Reverser& audioProcessor;
         
     KnobLook1 knobLook1;
         

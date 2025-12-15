@@ -16,7 +16,7 @@ std::unique_ptr<juce::RangedAudioParameter> newFloatParam(ParameterNames paramNa
 }
 
 
-juce::AudioProcessorValueTreeState::ParameterLayout APComp::createParameterLayout() {
+juce::AudioProcessorValueTreeState::ParameterLayout Reverser::createParameterLayout() {
     
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 

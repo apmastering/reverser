@@ -8,7 +8,7 @@
 #include "PluginEditor.h"
 
 
-GUI::GUI (APComp& p)
+GUI::GUI (Reverser& p)
 : AudioProcessorEditor (&p),
 audioProcessor (p),
 backgroundImage (juce::ImageFileFormat::loadFrom(BinaryData::bg_png, BinaryData::bg_pngSize)),

@@ -2,7 +2,7 @@
 #include "PluginProcessor.h"
 
 
-APComp::APComp()
+Reverser::Reverser()
 : AudioProcessor(BusesProperties()
                  .withInput("Input", juce::AudioChannelSet::quadraphonic(), true)
                  .withOutput("Output", juce::AudioChannelSet::stereo(), true)),
@@ -16,17 +16,17 @@ parameterList(static_cast<int>(ParameterNames::END) + 1) {
 }
 
 
-void APComp::prepareToPlay(double sampleRate, int samplesPerBlock) {
+void Reverser::prepareToPlay(double sampleRate, int samplesPerBlock) {
 }
 
 
-float APComp::getFloatKnobValue(ParameterNames parameter) const {
+float Reverser::getFloatKnobValue(ParameterNames parameter) const {
     
     return parameterList[static_cast<int>(parameter)]->get();
 }
 
 
-void APComp::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer&) {
+void Reverser::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer&) {
     
     juce::ScopedNoDenormals noDenormals;
 

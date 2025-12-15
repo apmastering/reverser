@@ -7,11 +7,11 @@
 #include <juce_core/juce_core.h>
 #include <juce_audio_processors/juce_audio_processors.h>
 
-class APComp final : public juce::AudioProcessor {
+class Reverser final : public juce::AudioProcessor {
     
 public:
     
-    APComp();
+    Reverser();
         
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
@@ -43,5 +43,5 @@ private:
     std::atomic <size_t> clippingCountdown;
     static constexpr size_t clippingCountdownAmount = 100;
     std::vector<juce::AudioParameterFloat*> parameterList;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (APComp)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Reverser)
 };
