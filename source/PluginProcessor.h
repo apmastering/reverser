@@ -7,6 +7,9 @@
 #include <juce_core/juce_core.h>
 #include <juce_audio_processors/juce_audio_processors.h>
 
+#include "APCommon.h"
+
+
 class Reverser final : public juce::AudioProcessor {
     
 public:
