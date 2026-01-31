@@ -4,7 +4,7 @@
 
 Reverser::Reverser()
 : AudioProcessor(BusesProperties()
-                 .withInput("Input", juce::AudioChannelSet::quadraphonic(), true)
+                 .withInput("Input", juce::AudioChannelSet::stereo(), true)
                  .withOutput("Output", juce::AudioChannelSet::stereo(), true)),
 apvts(*this, nullptr, "PARAMETERS", createParameterLayout()),
 parameterList(static_cast<int>(ParameterNames::END) + 1) {

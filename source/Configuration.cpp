@@ -17,12 +17,14 @@ bool Reverser::hasEditor() const { return true; }
 void Reverser::releaseResources() {}
 
 bool Reverser::isBusesLayoutSupported (const BusesLayout& layouts) const {
+    if (layouts.inputBuses.size() > 1 || layouts.outputBuses.size() > 1)
+        return false;
     const auto in  = layouts.getMainInputChannelSet();
-    if (layouts.inputBuses.size() > 1) return false;
-    if (const auto out = layouts.getMainOutputChannelSet(); in != out) return false;
-    if (in == juce::AudioChannelSet::mono()) return true;
-    if (in == juce::AudioChannelSet::stereo()) return true;
-    return false;
+    const auto out = layouts.getMainOutputChannelSet();
+    if (in != out)
+        return false;
+    return (in == juce::AudioChannelSet::mono() ||
+            in == juce::AudioChannelSet::stereo());
 }
 
 juce::AudioProcessorEditor* Reverser::createEditor() { return new GUI (*this); }
